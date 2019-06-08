@@ -1,26 +1,64 @@
-import React from 'react';
-import logo from './logo.svg';
+// App Component: has states with GIFS 
+
+import React, { Component } from 'react';
+import request from 'superagent'; 
+import SearchField from './components/SearchField'; 
+import GifList from './components/GifList'; 
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+const KEY = 'uD4068NVbNQsSRj4yOco7EtYjVd95O29'; 
+
+class App extends React.Component {
+  constructor() {
+      super();
+
+      this.state = {
+          gifs: []
+      }
+  }
+
+  handleTermChange = (term) => {
+      const url = `http://api.giphy.com/v1/gifs/search?q=${term.replace(/\s/g, '+')}&api_key=${KEY}`;
+
+      request.get(url, (err, res) => {
+          console.log('Here is the response body', res.body.data[0]);
+          this.setState({gifs: res.body.data})
+      });
+  }
+
+  handleTrendingChange = (trending) => {
+    const url = `http://api.giphy.com/v1/gifs/trending?api_key=${KEY}`;
+
+    request.get(url, (err, res) => {
+        console.log('Here is the response body', res.body.data[0]);
+        this.setState({gifs: res.body.data})
+    });
 }
 
-export default App;
+handleRandomChange = (random) => {
+  const url = `http://api.giphy.com/v1/gifs/random?api_key=${KEY}`;
+
+  request.get(url, (err, res) => {
+      console.log('Here is the response body', res.body.data[0]);
+      this.setState({gifs: res.body.data})
+  });
+}
+
+
+  render() {
+      return (
+          <div>
+              <SearchField onTermChange={this.handleTermChange} />
+              <div className="btns">
+              <button onClick={this.handleTrendingChange} className="btn1">Trending Gifs</button>
+              <button onClick={this.handleRandomChange} className="btn2">Random Gifs</button>
+              </div>
+              <GifList gifs={this.state.gifs} />
+          </div>
+      );
+  }
+}
+
+
+export default App; 
